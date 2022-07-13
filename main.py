@@ -5,9 +5,9 @@ import os
 from datetime import datetime
 
 # Connect to the mail server
-subjs = ['Subject Mogilev', 'Subject Smolevitchi']
+# subjs = ['Subject Mogilev', 'Subject Smolevitchi']
 mail = imaplib.IMAP4_SSL('mail.servolux.by')
-mail.login(os.getenv('MAIL'), os.getenv('SENT_PASS'))
+mail.login(os.getenv('SENT_MAIL'), os.getenv('SENT_PASS'))
 mail.list()
 mail.select("inbox")
 
@@ -16,7 +16,6 @@ mail.select("inbox")
 def readmail(subj):
     # Search a targeted mail by subject
     result, data = mail.search(None, subj)
-    # Getting ids
     ids = data[0]
     id_list = ids.split()
     # Getting the last mail
@@ -43,11 +42,12 @@ def readmail(subj):
                 sorted(to_zabb, key=lambda x: datetime.strptime(x[0], "%d/%m/%Y").strftime("%Y-%m-%d"), reverse=True)[0]
             # A little logging
             print(ordered)
-            # Sending to zabbix
-            os.system('zabbix_sender -z zabbix_host -s "host_name" -k {item_key} -o {value}'.format
-                      (item_key=ordered[0], value=ordered[1]))
+            # Sending to zabbix os.system('zabbix_sender -z zabbix_host -s "host_name" -k {item_key} -o {
+            # value}'.format(item_key=ordered[0], value=ordered[1]))
+            os.system('zabbix_sender -z {zhost} -s "{zname}" -k {zkey} -o {value}'.format(zhost=os.getenv('ZHOST'),
+                                                                                        zname=os.getenv('ZNAME'),
+                                                                                        zkey=os.getenv('ZKEY'),
+                                                                                        value=ordered[1]))
 
 
-
-for subj in subjs:
-    readmail(subj)
+readmail(os.getenv('SUBJ'))
