@@ -45,9 +45,9 @@ def readmail(subj):
             # Sending to zabbix os.system('zabbix_sender -z zabbix_host -s "host_name" -k {item_key} -o {
             # value}'.format(item_key=ordered[0], value=ordered[1]))
             os.system('zabbix_sender -z {zhost} -s "{zname}" -k {zkey} -o {value}'.format(zhost=os.getenv('ZHOST'),
-                                                                                        zname=os.getenv('ZNAME'),
-                                                                                        zkey=os.getenv('ZKEY'),
-                                                                                        value=ordered[1]))
+                                                                                          zname=os.getenv('ZNAME'),
+                                                                                          zkey=os.getenv('ZKEY'),
+                                                                                          value=ordered[1]))
 
 
 readmail(os.getenv('SUBJ'))
