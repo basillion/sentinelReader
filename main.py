@@ -60,9 +60,20 @@ def readmail(subj):
     # Create pandas dataframe
     df = pd.DataFrame({'date': dates, 'value': values})
     print(df)
+    # Create temporary table and upload DataFrame
+    conn.execute("""CREATE TEMPORARY TABLE temp_table (date DATE primary key, value INT)"""
+    )
     # Insert data to the table
-    df.to_sql(re.findall(r'\s+(\S+)$', os.getenv('SUBJ'))[0], conn, if_exists='append', index=False,
-              dtype={'date': DATE,'value': INT})
+    # re.findall(r'\s+(\S+)$', os.getenv('SUBJ'))[0]
+    df.to_sql('temp_table', conn, if_exists='append', index=False, dtype={'date': DATE, 'value': INT})
+
+    # Merge temp_table into main table
+    conn.execute("""
+                INSERT INTO {main_table} (date, value) 
+                SELECT date, value FROM temp_table
+                ON DUPLICATE KEY UPDATE value = temp_table.value
+    """.format(main_table=re.findall(r'\s+(\S+)$', os.getenv('SUBJ'))[0]))
+
     conn.close()
     '''
     to_zabb = []
